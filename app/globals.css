@@ -1,0 +1,340 @@
+@import "tailwindcss";
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .card {
+    background: #1a1a1a !important;
+    color: #ffffff !important;
+    border: 1px solid #333 !important;
+  }
+
+  .data-row {
+    background: #2a2a2a !important;
+    border-color: #444 !important;
+    color: #ffffff !important;
+  }
+
+  .data-row.current {
+    border-color: #0070f3 !important;
+    background: #1a2332 !important;
+  }
+
+  .form-control {
+    background: #333 !important;
+    border-color: #555 !important;
+    color: #ffffff !important;
+  }
+
+  .form-control:focus {
+    border-color: #0070f3 !important;
+    background: #444 !important;
+  }
+
+  .expandable-header {
+    background: #333 !important;
+    color: #ffffff !important;
+  }
+
+  .expandable-content {
+    background: #2a2a2a !important;
+    color: #ffffff !important;
+  }
+
+  .expandable-content div {
+    background: #333 !important;
+    color: #ffffff !important;
+    border-color: #555 !important;
+  }
+
+  .upload-area {
+    background: #2a2a2a !important;
+    border-color: #555 !important;
+    color: #ffffff !important;
+  }
+
+  .upload-area:hover {
+    border-color: #0070f3 !important;
+    background: #333 !important;
+  }
+
+  .upload-area.dragover {
+    border-color: #0070f3 !important;
+    background: #1a2332 !important;
+  }
+
+  /* Button styles for dark mode */
+  .btn {
+    background: #0070f3 !important;
+    color: #ffffff !important;
+    border: 1px solid #0070f3 !important;
+  }
+
+  .btn:hover {
+    background: #0051a2 !important;
+    border-color: #0051a2 !important;
+  }
+
+  .btn-secondary {
+    background: #6c757d !important;
+    border-color: #6c757d !important;
+  }
+
+  .btn-secondary:hover {
+    background: #545b62 !important;
+    border-color: #545b62 !important;
+  }
+
+  .btn-success {
+    background: #28a745 !important;
+    border-color: #28a745 !important;
+  }
+
+  .btn-success:hover {
+    background: #1e7e34 !important;
+    border-color: #1e7e34 !important;
+  }
+
+  /* Text content areas */
+  .form-group div {
+    background: #333 !important;
+    border-color: #555 !important;
+    color: #ffffff !important;
+  }
+
+  /* Navigation buttons */
+  .navigation-buttons {
+    background: transparent !important;
+  }
+
+  /* Status indicators */
+  .status-labeled {
+    background: #1e4d2b !important;
+    border-color: #28a745 !important;
+    color: #ffffff !important;
+  }
+
+  .status-unlabeled {
+    background: #4a3c1a !important;
+    border-color: #ffc107 !important;
+    color: #ffffff !important;
+  }
+}
+
+/* Light mode status indicators */
+.status-labeled {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.status-unlabeled {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  color: #856404;
+}
+
+/* Light mode for expandable content */
+.expandable-content div {
+  background: #f8f9fa;
+  color: #000000;
+  border-color: #ddd;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.btn {
+  background: #0070f3;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin: 5px;
+}
+
+.btn:hover {
+  background: #0051a2;
+}
+
+.btn-secondary {
+  background: #6c757d;
+}
+
+.btn-secondary:hover {
+  background: #545b62;
+}
+
+.btn-success {
+  background: #28a745;
+}
+
+.btn-success:hover {
+  background: #1e7e34;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #0070f3;
+  box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.2);
+}
+
+.expandable {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+.expandable-header {
+  background: #f8f9fa;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.expandable-content {
+  padding: 10px;
+  display: none;
+}
+
+.expandable-content.expanded {
+  display: block;
+}
+
+.upload-area {
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.upload-area:hover {
+  border-color: #0070f3;
+}
+
+.upload-area.dragover {
+  border-color: #0070f3;
+  background-color: #f0f8ff;
+}
+
+.data-row {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin: 10px 0;
+  padding: 15px;
+  background: #f9f9f9;
+}
+
+.data-row.current {
+  border-color: #0070f3;
+  background: #f0f8ff;
+}
+
+.dropdown-group {
+  display: flex;
+  gap: 20px;
+  margin: 15px 0;
+}
+
+.dropdown-item {
+  flex: 1;
+}
+
+.navigation-buttons {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+/* Additional dark mode improvements */
+@media (prefers-color-scheme: dark) {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: #ffffff !important;
+  }
+
+  p,
+  span,
+  div {
+    color: #ffffff !important;
+  }
+
+  strong {
+    color: #ffffff !important;
+  }
+
+  /* Ensure all text is visible */
+  * {
+    color: inherit;
+  }
+
+  /* Override any inline styles that might hide text */
+  [style*="color: rgb(0, 0, 0)"] {
+    color: #ffffff !important;
+  }
+
+  [style*="color: #000"] {
+    color: #ffffff !important;
+  }
+}
