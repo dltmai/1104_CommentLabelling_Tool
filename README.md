@@ -5,8 +5,8 @@
 ## Tính năng
 
 - **Upload Excel**: Hỗ trợ upload file Excel (.xlsx, .xls) hoặc CSV
-- **Hiển thị dữ liệu**: Hiển thị các cột Summary_File, Similarity_Score, Reference_Summary, Generated_Summary, Summary, Comment
-- **Expand/Collapse**: Cho phép mở rộng hoặc thu gọn các phần Summary, Reference Summary, Generated Summary
+- **Hiển thị dữ liệu**: Hiển thị các cột Comment, Summary
+- **Expand/Collapse**: Cho phép mở rộng hoặc thu gọn phần Summary
 - **Gán nhãn**:
   - Relevance: 0-Mapping, 1-Not mapping
   - Contribution: 0-Generic, 1-Constructive
