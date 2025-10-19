@@ -112,17 +112,6 @@ export default function DataDisplay({
             </div>
 
             {/* Removed Summary File and Similarity Score fields per UI update request */}
-
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Comment
-              </label>
-              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 min-h-[80px]">
-                <p className="text-gray-900 dark:text-white">
-                  {currentRow.Comment || "No comment"}
-                </p>
-              </div>
-            </div>
           </div>
 
           <ExpandableSection
@@ -134,6 +123,17 @@ export default function DataDisplay({
               {currentRow.Summary || "No summary available"}
             </div>
           </ExpandableSection>
+
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Comment
+            </label>
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 min-h-[80px]">
+              <p className="text-gray-900 dark:text-white">
+                {currentRow.Comment || "No comment"}
+              </p>
+            </div>
+          </div>
 
           <LabelingControls
             relevance={currentRow.Relevance}
