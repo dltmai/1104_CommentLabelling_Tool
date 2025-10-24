@@ -23,28 +23,70 @@ export default function Home() {
   };
 
   const findNextUnlabeled = () => {
-    const unlabeledIndex = data.findIndex(
-      (row, index) =>
-        index > currentIndex &&
-        (row.Relevance === null ||
-          row.Relevance === undefined ||
-          row.Contribution === null ||
-          row.Contribution === undefined)
-    );
-    if (unlabeledIndex !== -1) {
-      setCurrentIndex(unlabeledIndex);
-    } else {
-      // Tìm từ đầu nếu không tìm thấy từ vị trí hiện tại
-      const firstUnlabeled = data.findIndex(
+    // Find next summary group (after currentIndex) that contains any unlabeled row
+    const currentSummary = data[currentIndex]?.Summary;
+
+    const findStartOfSummary = (idx) => {
+      const summary = data[idx]?.Summary;
+      if (summary === undefined) return idx;
+      return data.findIndex((r) => r.Summary === summary);
+    };
+
+    // iterate through indices after currentIndex, but skip within same summary
+    let i = currentIndex + 1;
+    let found = -1;
+    while (i < data.length) {
+      const s = data[i]?.Summary;
+      if (s !== currentSummary) {
+        const start = findStartOfSummary(i);
+        const group = data.filter((r) => r.Summary === s);
+        const hasUnlabeled = group.some(
+          (row) =>
+            row.Relevance === null ||
+            row.Relevance === undefined ||
+            row.Contribution === null ||
+            row.Contribution === undefined ||
+            row.Contribution_Score === null ||
+            row.Contribution_Score === undefined
+        );
+        if (hasUnlabeled) {
+          found = start;
+          break;
+        }
+        // skip to end of this summary group
+        const lastIndexOfGroup = data.map((r) => r.Summary).lastIndexOf(s);
+        i = lastIndexOfGroup + 1;
+      } else {
+        i++;
+      }
+    }
+
+    if (found !== -1) {
+      setCurrentIndex(found);
+      return;
+    }
+
+    // If not found, search from beginning
+    i = 0;
+    while (i < data.length) {
+      const s = data[i]?.Summary;
+      const start = findStartOfSummary(i);
+      const group = data.filter((r) => r.Summary === s);
+      const hasUnlabeled = group.some(
         (row) =>
           row.Relevance === null ||
           row.Relevance === undefined ||
           row.Contribution === null ||
-          row.Contribution === undefined
+          row.Contribution === undefined ||
+          row.Contribution_Score === null ||
+          row.Contribution_Score === undefined
       );
-      if (firstUnlabeled !== -1) {
-        setCurrentIndex(firstUnlabeled);
+      if (hasUnlabeled) {
+        setCurrentIndex(start);
+        return;
       }
+      const lastIndexOfGroup = data.map((r) => r.Summary).lastIndexOf(s);
+      i = lastIndexOfGroup + 1;
     }
   };
 
@@ -53,15 +95,31 @@ export default function Home() {
   };
 
   const handlePrevious = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
+    if (!data.length) return;
+    const currentSummary = data[currentIndex]?.Summary;
+    // find previous index where Summary changes
+    let i = currentIndex - 1;
+    while (i >= 0 && data[i]?.Summary === currentSummary) {
+      i--;
     }
+    if (i < 0) return; // no previous summary
+    // i is now at last index of previous summary; find its first index
+    const prevSummary = data[i]?.Summary;
+    const firstIndex = data.findIndex((r) => r.Summary === prevSummary);
+    if (firstIndex !== -1) setCurrentIndex(firstIndex);
   };
 
   const handleNext = () => {
-    if (currentIndex < data.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+    if (!data.length) return;
+    const currentSummary = data[currentIndex]?.Summary;
+    // find first index after currentIndex whose Summary differs
+    let i = currentIndex + 1;
+    while (i < data.length && data[i]?.Summary === currentSummary) {
+      i++;
     }
+    if (i >= data.length) return; // no next summary
+    // i is at first index of next summary (by construction)
+    setCurrentIndex(i);
   };
 
   return (

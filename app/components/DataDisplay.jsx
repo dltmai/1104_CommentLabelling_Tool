@@ -21,6 +21,16 @@ export default function DataDisplay({
   const currentRow = data[currentIndex];
   if (!currentRow) return null;
 
+  // Collect all rows (with their original indices) that share the same Summary as the current row
+  const groupRows = data
+    .map((r, i) => ({ row: r, index: i }))
+    .filter(({ row }) => row.Summary === currentRow.Summary);
+
+  const handleLabelUpdateAt = (index, field, value) => {
+    const updatedRow = { ...data[index], [field]: value };
+    onUpdateRow(index, updatedRow);
+  };
+
   const toggleSection = (section) => {
     setExpandedSections((prev) => ({
       ...prev,
@@ -58,23 +68,30 @@ export default function DataDisplay({
     onUpdateRow(currentIndex, updatedRow);
   };
 
-  // Debug: Log current row values (including new Contribution_Score)
-  console.log("Current row:", {
-    Relevance: currentRow.Relevance,
-    Contribution: currentRow.Contribution,
-    Contribution_Score: currentRow.Contribution_Score,
-    RelevanceType: typeof currentRow.Relevance,
-    ContributionType: typeof currentRow.Contribution,
-    ContributionScoreType: typeof currentRow.Contribution_Score,
-  });
+  // Debug: Log group info (all rows sharing the same Summary)
+  console.log(
+    "Current summary group:",
+    groupRows.map(({ row, index }) => ({
+      index,
+      Relevance: row.Relevance,
+      Contribution: row.Contribution,
+      Contribution_Score: row.Contribution_Score,
+    }))
+  );
 
-  const isCurrentRowLabeled =
-    currentRow.Relevance !== null &&
-    currentRow.Relevance !== undefined &&
-    currentRow.Contribution !== null &&
-    currentRow.Contribution !== undefined &&
-    currentRow.Contribution_Score !== null &&
-    currentRow.Contribution_Score !== undefined;
+  // Consider the summary group 'labeled' only when every comment row in the
+  // group has Relevance, Contribution and Contribution_Score set.
+  const isGroupLabeled =
+    groupRows.length > 0 &&
+    groupRows.every(
+      ({ row }) =>
+        row.Relevance !== null &&
+        row.Relevance !== undefined &&
+        row.Contribution !== null &&
+        row.Contribution !== undefined &&
+        row.Contribution_Score !== null &&
+        row.Contribution_Score !== undefined
+    );
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -106,12 +123,12 @@ export default function DataDisplay({
               </h3>
               <div
                 className={`px-4 py-2 rounded-full text-sm font-medium ${
-                  isCurrentRowLabeled
+                  isGroupLabeled
                     ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
                     : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
                 }`}
               >
-                {isCurrentRowLabeled ? "✓ Labeled" : "⚠️ Needs Labeling"}
+                {isGroupLabeled ? "✓ Labeled" : "⚠️ Needs Labeling"}
               </div>
             </div>
 
@@ -130,27 +147,50 @@ export default function DataDisplay({
 
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Comment
+              Comments for this Summary ({groupRows.length})
             </label>
-            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 min-h-[80px]">
-              <p className="text-gray-900 dark:text-white">
-                {currentRow.Comment || "No comment"}
-              </p>
+
+            <div className="space-y-6">
+              {groupRows.length === 0 ? (
+                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <p className="text-gray-900 dark:text-white">No comment</p>
+                </div>
+              ) : (
+                groupRows.map(({ row, index }) => (
+                  <div key={index} className="space-y-3">
+                    <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                      <p className="text-gray-900 dark:text-white whitespace-pre-wrap">
+                        {row.Comment || "No comment"}
+                      </p>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                      <LabelingControls
+                        relevance={row.Relevance}
+                        contribution={row.Contribution}
+                        contributionScore={row.Contribution_Score}
+                        onRelevanceChange={(value) =>
+                          handleLabelUpdateAt(index, "Relevance", value)
+                        }
+                        onContributionChange={(value) =>
+                          handleLabelUpdateAt(index, "Contribution", value)
+                        }
+                        onContributionScoreChange={(value) =>
+                          handleLabelUpdateAt(
+                            index,
+                            "Contribution_Score",
+                            value
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
-          <LabelingControls
-            relevance={currentRow.Relevance}
-            contribution={currentRow.Contribution}
-            contributionScore={currentRow.Contribution_Score}
-            onRelevanceChange={(value) => handleLabelUpdate("Relevance", value)}
-            onContributionChange={(value) =>
-              handleLabelUpdate("Contribution", value)
-            }
-            onContributionScoreChange={(value) =>
-              handleLabelUpdate("Contribution_Score", value)
-            }
-          />
+          {/* Per-comment labeling controls are rendered above; removed global controls */}
         </div>
 
         <NavigationControls

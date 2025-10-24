@@ -26,7 +26,7 @@ export default function FileUpload({ onDataLoad }) {
         const headers = jsonData[0];
         const rows = jsonData.slice(1);
 
-        const processedData = rows
+        let processedData = rows
           .map((row, index) => ({
             Summary_File: row[0] || "",
             Similarity_Score: parseFloat(row[1]) || 0,
@@ -50,6 +50,18 @@ export default function FileUpload({ onDataLoad }) {
                 : null,
           }))
           .filter((row) => row.Summary_File); // Lọc bỏ các dòng trống
+        // Sort by Summary_File (trimmed, numeric-aware where possible) so the UI
+        // displays rows grouped consistently for the user.
+        processedData.sort((a, b) =>
+          (a.Summary_File || "")
+            .toString()
+            .trim()
+            .localeCompare(
+              (b.Summary_File || "").toString().trim(),
+              undefined,
+              { numeric: true, sensitivity: "base" }
+            )
+        );
 
         onDataLoad(processedData);
       } catch (error) {
