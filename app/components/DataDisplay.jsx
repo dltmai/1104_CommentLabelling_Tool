@@ -58,19 +58,23 @@ export default function DataDisplay({
     onUpdateRow(currentIndex, updatedRow);
   };
 
-  // Debug: Log current row values
+  // Debug: Log current row values (including new Contribution_Score)
   console.log("Current row:", {
     Relevance: currentRow.Relevance,
     Contribution: currentRow.Contribution,
+    Contribution_Score: currentRow.Contribution_Score,
     RelevanceType: typeof currentRow.Relevance,
     ContributionType: typeof currentRow.Contribution,
+    ContributionScoreType: typeof currentRow.Contribution_Score,
   });
 
   const isCurrentRowLabeled =
     currentRow.Relevance !== null &&
     currentRow.Relevance !== undefined &&
     currentRow.Contribution !== null &&
-    currentRow.Contribution !== undefined;
+    currentRow.Contribution !== undefined &&
+    currentRow.Contribution_Score !== null &&
+    currentRow.Contribution_Score !== undefined;
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -138,9 +142,13 @@ export default function DataDisplay({
           <LabelingControls
             relevance={currentRow.Relevance}
             contribution={currentRow.Contribution}
+            contributionScore={currentRow.Contribution_Score}
             onRelevanceChange={(value) => handleLabelUpdate("Relevance", value)}
             onContributionChange={(value) =>
               handleLabelUpdate("Contribution", value)
+            }
+            onContributionScoreChange={(value) =>
+              handleLabelUpdate("Contribution_Score", value)
             }
           />
         </div>
