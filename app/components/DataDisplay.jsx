@@ -28,6 +28,12 @@ export default function DataDisplay({
 
   const handleLabelUpdateAt = (index, field, value) => {
     const updatedRow = { ...data[index], [field]: value };
+    console.log("DataDisplay: handleLabelUpdateAt", {
+      index,
+      field,
+      value,
+      updatedRow,
+    });
     onUpdateRow(index, updatedRow);
   };
 
@@ -65,6 +71,12 @@ export default function DataDisplay({
 
   const handleLabelUpdate = (field, value) => {
     const updatedRow = { ...currentRow, [field]: value };
+    console.log("DataDisplay: handleLabelUpdate", {
+      currentIndex,
+      field,
+      value,
+      updatedRow,
+    });
     onUpdateRow(currentIndex, updatedRow);
   };
 

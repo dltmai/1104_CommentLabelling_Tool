@@ -48,6 +48,14 @@ export default function FileUpload({ onDataLoad }) {
               !isNaN(parseInt(row[7]))
                 ? parseInt(row[7])
                 : null,
+            // Map Contribution_Score if present (column 9 / index 8)
+            Contribution_Score:
+              row[8] !== undefined &&
+              row[8] !== null &&
+              row[8] !== "" &&
+              !isNaN(parseInt(String(row[8]).trim()))
+                ? parseInt(String(row[8]).trim())
+                : null,
           }))
           .filter((row) => row.Summary_File); // Lọc bỏ các dòng trống
         // Sort by Summary_File (trimmed, numeric-aware where possible) so the UI
