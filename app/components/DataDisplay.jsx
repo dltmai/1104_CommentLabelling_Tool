@@ -55,7 +55,14 @@ export default function DataDisplay({
 
   const handleLabelUpdate = (field, value) => {
     const updatedRow = { ...currentRow, [field]: value };
-    onUpdateRow(currentIndex, updatedRow);
+    // debug log to help investigate why updates might not be applied
+    console.log("handleLabelUpdate", { field, value });
+    console.log("updatedRow ->", updatedRow);
+    if (typeof onUpdateRow === "function") {
+      onUpdateRow(currentIndex, updatedRow);
+    } else {
+      console.warn("onUpdateRow is not a function", onUpdateRow);
+    }
   };
 
   // Debug: Log current row values (including new Contribution_Score)

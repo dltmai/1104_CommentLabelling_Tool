@@ -17,8 +17,10 @@ export default function Home() {
   };
 
   const handleUpdateRow = (index, updatedRow) => {
+    console.log("handleUpdateRow called", { index, updatedRow });
     const newData = [...data];
     newData[index] = updatedRow;
+    console.log("newData sample at index", index, newData[index]);
     setData(newData);
   };
 
