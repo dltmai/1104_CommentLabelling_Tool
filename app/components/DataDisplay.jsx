@@ -28,7 +28,6 @@ export default function DataDisplay({
     }));
   };
 
-  // Collapse summary when currentIndex changes (navigation happened)
   useEffect(() => {
     setExpandedSections((prev) => ({ ...prev, summary: false }));
   }, [currentIndex]);
@@ -37,7 +36,6 @@ export default function DataDisplay({
     setExpandedSections((prev) => ({ ...prev, summary: false }));
   };
 
-  // Wrap navigation callbacks so summary auto-collapses when user navigates
   const handleFindNextInternal = () => {
     collapseSummary();
     if (onFindNext) onFindNext();
@@ -54,34 +52,62 @@ export default function DataDisplay({
   };
 
   const handleLabelUpdate = (field, value) => {
-    const updatedRow = { ...currentRow, [field]: value };
-    // debug log to help investigate why updates might not be applied
-    console.log("handleLabelUpdate", { field, value });
-    console.log("updatedRow ->", updatedRow);
+    // Send a partial update (single-field) to the parent. Parent should merge
+    // this with the existing row to avoid overwriting concurrent updates.
+    const partial = { [field]: value };
+    console.log("handleLabelUpdate (partial)", { field, value });
     if (typeof onUpdateRow === "function") {
-      onUpdateRow(currentIndex, updatedRow);
+      onUpdateRow(currentIndex, partial);
     } else {
       console.warn("onUpdateRow is not a function", onUpdateRow);
     }
   };
 
-  // Debug: Log current row values (including new Contribution_Score)
-  console.log("Current row:", {
-    Relevance: currentRow.Relevance,
-    Contribution: currentRow.Contribution,
-    Contribution_Score: currentRow.Contribution_Score,
-    RelevanceType: typeof currentRow.Relevance,
-    ContributionType: typeof currentRow.Contribution,
-    ContributionScoreType: typeof currentRow.Contribution_Score,
-  });
+  const hasValue = (v) =>
+    v !== null &&
+    v !== undefined &&
+    String(v).trim() !== "" &&
+    String(v).toLowerCase() !== "null" &&
+    String(v).toLowerCase() !== "undefined";
 
-  const isCurrentRowLabeled =
-    currentRow.Relevance !== null &&
-    currentRow.Relevance !== undefined &&
-    currentRow.Contribution !== null &&
-    currentRow.Contribution !== undefined &&
-    currentRow.Contribution_Score !== null &&
-    currentRow.Contribution_Score !== undefined;
+  // ✅ Logic xác định dòng đã được gán nhãn (chuẩn hoá kiểu trước khi kiểm tra)
+  // - Relevance và Contribution là bắt buộc
+  // - Nếu Contribution === 0 (Generic) -> chỉ cần Relevance + Contribution
+  // - Nếu Contribution === 1 (Constructive) -> cần Contribution_Score trong [1..10]
+
+  const contributionVal = currentRow.Contribution;
+  const isCurrentRowLabeled = (() => {
+    const relevanceSet = hasValue(currentRow.Relevance);
+    const contributionSet = hasValue(contributionVal);
+
+    // Debug: print the evaluated flags
+    console.log("label-check", {
+      relevance: currentRow.Relevance,
+      contribution: contributionVal,
+      score: currentRow.Contribution_Score,
+      relevanceSet,
+      contributionSet,
+    });
+
+    if (!relevanceSet || !contributionSet) return false;
+
+    const contribNum = Number(contributionVal);
+    if (!Number.isFinite(contribNum)) return false;
+
+    if (contribNum === 1) {
+      // Constructive: require score 1..10
+      const scoreNum = Number(currentRow.Contribution_Score);
+      return (
+        Number.isFinite(scoreNum) &&
+        Number.isInteger(scoreNum) &&
+        scoreNum >= 1 &&
+        scoreNum <= 10
+      );
+    }
+
+    // For Generic (0) or other numeric values: Relevance+Contribution enough
+    return true;
+  })();
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -121,8 +147,6 @@ export default function DataDisplay({
                 {isCurrentRowLabeled ? "✓ Labeled" : "⚠️ Needs Labeling"}
               </div>
             </div>
-
-            {/* Removed Summary File and Similarity Score fields per UI update request */}
           </div>
 
           <ExpandableSection

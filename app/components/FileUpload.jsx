@@ -22,42 +22,101 @@ export default function FileUpload({ onDataLoad }) {
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-        // Chuyển đổi dữ liệu thành format mong muốn
-        const headers = jsonData[0];
+        // Chuyển đổi dữ liệu thành format mong muốn (hỗ trợ cả header-based và positional)
+        const headers = jsonData[0] || [];
         const rows = jsonData.slice(1);
 
-        let processedData = rows
-          .map((row, index) => ({
-            Summary_File: row[0] || "",
-            Similarity_Score: parseFloat(row[1]) || 0,
-            Reference_Summary: row[2] || "",
-            Generated_Summary: row[3] || "",
-            Summary: row[4] || "",
-            Comment: row[5] || "",
-            Relevance:
-              row[6] !== undefined &&
-              row[6] !== null &&
-              row[6] !== "" &&
-              !isNaN(parseInt(row[6]))
-                ? parseInt(row[6])
-                : null,
-            Contribution:
-              row[7] !== undefined &&
-              row[7] !== null &&
-              row[7] !== "" &&
-              !isNaN(parseInt(row[7]))
-                ? parseInt(row[7])
-                : null,
-            // If Contribution is generic (0) from the file, default the score to 0
-            Contribution_Score:
-              row[7] !== undefined &&
-              row[7] !== null &&
-              row[7] !== "" &&
-              !isNaN(parseInt(row[7])) &&
-              parseInt(row[7]) === 0
-                ? 0
-                : null,
-          }))
+        // Normalize header names for detection. Create a normalized key that
+        // removes non-alphanumeric characters so headers like "ContributionScore",
+        // "Contribution Score" or "contribution_score" all match.
+        const normalizeKey = (s) =>
+          (s || "")
+            .toString()
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, "");
+        const normalizedHeaders = headers.map((h) => normalizeKey(h));
+
+        const findHeaderIndex = (names, fallbackIndex) => {
+          const normalizedNames = names.map((n) => normalizeKey(n));
+          for (let i = 0; i < normalizedHeaders.length; i++) {
+            const h = normalizedHeaders[i];
+            if (!h) continue;
+            // Strict equality on normalized header names to avoid accidental
+            // substring matches (e.g. 'similarityscore' matching 'score').
+            for (const nn of normalizedNames) {
+              if (h === nn) return i;
+            }
+          }
+          return fallbackIndex;
+        };
+
+        // Known header name candidates for each field
+        const idxSummaryFile = findHeaderIndex(
+          ["summary_file", "summary file"],
+          0
+        );
+        const idxSimilarity = findHeaderIndex(
+          ["similarity_score", "similarity score"],
+          1
+        );
+        const idxReferenceSummary = findHeaderIndex(
+          ["reference_summary", "reference summary"],
+          2
+        );
+        const idxGeneratedSummary = findHeaderIndex(
+          ["generated_summary", "generated summary"],
+          3
+        );
+        const idxSummary = findHeaderIndex(["summary"], 4);
+        const idxComment = findHeaderIndex(["comment", "comments"], 5);
+        const idxRelevance = findHeaderIndex(["relevance"], 6);
+        const idxContribution = findHeaderIndex(["contribution"], 7);
+        const idxContributionScore = findHeaderIndex(
+          ["contribution_score", "contribution score", "score"],
+          8
+        );
+
+        const parseIntOrNull = (v) => {
+          if (v === undefined || v === null) return null;
+          const s = String(v).trim();
+          if (s === "") return null;
+          const n = parseInt(s, 10);
+          return Number.isNaN(n) ? null : n;
+        };
+
+        // Normalize imported contribution scores into 1-10 range.
+        // Heuristics:
+        // - If value is between 1 and 10, keep as-is.
+        // - If value is between 10 and 100 and is a multiple of 10, assume it's a percent and map 100->10, 80->8, etc.
+        // - Otherwise clamp values >10 down to 10 and values <1 to null.
+        const normalizeScore = (n) => {
+          if (n === null || n === undefined) return null;
+          if (typeof n !== "number") return null;
+          if (n >= 1 && n <= 10) return n;
+          if (n > 10 && n <= 100 && n % 10 === 0)
+            return Math.max(1, Math.min(10, Math.round(n / 10)));
+          if (n > 10) return 10;
+          return null;
+        };
+
+        const processedData = rows
+          .map((row) => {
+            const get = (i) => (row[i] !== undefined ? row[i] : "");
+            return {
+              Summary_File: get(idxSummaryFile) || "",
+              Similarity_Score: parseFloat(get(idxSimilarity)) || 0,
+              Reference_Summary: get(idxReferenceSummary) || "",
+              Generated_Summary: get(idxGeneratedSummary) || "",
+              Summary: get(idxSummary) || "",
+              Comment: get(idxComment) || "",
+              Relevance: parseIntOrNull(get(idxRelevance)),
+              Contribution: parseIntOrNull(get(idxContribution)),
+              Contribution_Score: normalizeScore(
+                parseIntOrNull(get(idxContributionScore))
+              ),
+            };
+          })
           .filter((row) => row.Summary_File); // Lọc bỏ các dòng trống
 
         // Sort processedData by Summary_File (trim + numeric-aware) so the UI

@@ -18,10 +18,17 @@ export default function Home() {
 
   const handleUpdateRow = (index, updatedRow) => {
     console.log("handleUpdateRow called", { index, updatedRow });
-    const newData = [...data];
-    newData[index] = updatedRow;
-    console.log("newData sample at index", index, newData[index]);
-    setData(newData);
+    // Use functional state update to avoid races when multiple partial
+    // updates arrive quickly (Contribution and Contribution_Score).
+    setData((prev) => {
+      const newData = [...prev];
+      newData[index] = {
+        ...(newData[index] || {}),
+        ...(updatedRow || {}),
+      };
+      console.log("newData sample at index", index, newData[index]);
+      return newData;
+    });
   };
 
   const findNextUnlabeled = () => {

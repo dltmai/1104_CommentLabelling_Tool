@@ -87,15 +87,30 @@ export default function LabelingControls({
             const value = e.target.value;
             const parsed = value === "" ? null : parseInt(value);
             setLocalContribution(value);
+            // Ensure we always send an explicit 0 when the user selected the
+            // "0" option, avoid any ambiguity from parsed === null.
+            const toSend = value === "0" ? 0 : parsed;
             console.log("LabelingControls:onContributionChange", {
               value,
               parsed,
+              toSend,
             });
-            onContributionChange(parsed);
-            // If user selects Generic (0), default the score to 0 and hide the score field
+            onContributionChange(toSend);
+
             if (parsed === 0) {
+              // If user selects Generic (0), explicitly set score to 0 (marker)
+              // and keep it hidden. Use 0 to represent generic.
               setLocalScore("0");
               onContributionScoreChange && onContributionScoreChange(0);
+            } else if (parsed === 1) {
+              // If user selects Constructive (1), clear any previous score
+              // (e.g. leftover 0) so user must actively pick a 1-10 value.
+              setLocalScore("");
+              onContributionScoreChange && onContributionScoreChange(null);
+            } else {
+              // If empty or unexpected -> clear score
+              setLocalScore("");
+              onContributionScoreChange && onContributionScoreChange(null);
             }
           }}
         >
@@ -104,6 +119,7 @@ export default function LabelingControls({
           <option value="1">1 - Constructive</option>
         </select>
       </div>
+
       {showScore && (
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
