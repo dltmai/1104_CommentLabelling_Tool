@@ -91,19 +91,39 @@ export default function DataDisplay({
     }))
   );
 
-  // Consider the summary group 'labeled' only when every comment row in the
-  // group has Relevance, Contribution and Contribution_Score set.
-  const isGroupLabeled =
-    groupRows.length > 0 &&
-    groupRows.every(
-      ({ row }) =>
-        row.Relevance !== null &&
-        row.Relevance !== undefined &&
-        row.Contribution !== null &&
-        row.Contribution !== undefined &&
+  // Consider the summary group 'labeled' when every comment row in the
+  // group is individually labeled. Rules per-row:
+  // - Relevance and Contribution must be set (non-null/undefined)
+  // - If Contribution is Constructive (1) then Contribution_Score must be a
+  //   positive, set value; if Contribution is Generic (0) a score is not
+  //   required.
+  const isRowLabeled = (row) => {
+    const relevanceSet = row.Relevance !== null && row.Relevance !== undefined;
+    // Treat Contribution as set when it's explicitly present. Additionally,
+    // if Contribution is missing but Contribution_Score === 0 and Relevance is
+    // set, assume the annotator intended Generic (0) and treat it as set.
+    const contributionSet =
+      row.Contribution !== null && row.Contribution !== undefined
+        ? true
+        : relevanceSet &&
+          (row.Contribution_Score === 0 || row.Contribution_Score === "0");
+    if (!relevanceSet || !contributionSet) return false;
+
+    // If Contribution is constructive (1), require a positive score
+    if (Number(row.Contribution) === 1) {
+      return (
         row.Contribution_Score !== null &&
-        row.Contribution_Score !== undefined
-    );
+        row.Contribution_Score !== undefined &&
+        Number(row.Contribution_Score) > 0
+      );
+    }
+
+    // Generic contribution (0) does not require a score
+    return true;
+  };
+
+  const isGroupLabeled =
+    groupRows.length > 0 && groupRows.every(({ row }) => isRowLabeled(row));
 
   return (
     <div className="max-w-6xl mx-auto">
