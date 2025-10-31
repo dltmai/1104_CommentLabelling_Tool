@@ -71,6 +71,11 @@ export default function FileUpload({ onDataLoad }) {
             )
         );
 
+        // Debug: show a sample of parsed rows to verify Contribution and Contribution_Score
+        console.log(
+          "FileUpload: parsed rows sample:",
+          processedData.slice(0, 5)
+        );
         onDataLoad(processedData);
       } catch (error) {
         console.error("Error reading file:", error);
