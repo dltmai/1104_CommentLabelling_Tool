@@ -10,7 +10,9 @@ export default function DataDisplay({
   currentIndex,
   onUpdateRow,
   onFindNext,
-  onExport,
+  onExportExcel,
+  onExportCSV,
+  onDownloadJSON,
   onPrevious,
   onNext,
 }) {
@@ -139,10 +141,24 @@ export default function DataDisplay({
             </button>
             <button
               className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
-              onClick={onExport}
+              onClick={onExportExcel}
             >
               <span>📊</span>
               Export Excel
+            </button>
+            <button
+              className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
+              onClick={onExportCSV}
+            >
+              <span>🧾</span>
+              Export CSV
+            </button>
+            <button
+              className="px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
+              onClick={onDownloadJSON}
+            >
+              <span>📥</span>
+              Download JSON
             </button>
           </div>
         </div>

@@ -3,17 +3,27 @@
 import { useState } from "react";
 import FileUpload from "./components/FileUpload";
 import DataDisplay from "./components/DataDisplay";
-import { exportToExcel, getLabelingProgress } from "./utils/exportUtils";
+import {
+  exportToExcel,
+  getLabelingProgress,
+  exportToCSV,
+  downloadJson,
+  buildGroupedJson,
+} from "./utils/exportUtils";
 
 export default function Home() {
   const [data, setData] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [groupedJson, setGroupedJson] = useState(null);
 
   const handleDataLoad = (loadedData) => {
     setData(loadedData);
     setCurrentIndex(0);
     setIsDataLoaded(true);
+    // Build grouped JSON (same shape as the Python converter)
+    const grouped = buildGroupedJson(loadedData);
+    setGroupedJson(grouped);
   };
 
   const handleUpdateRow = (index, updatedRow) => {
@@ -86,8 +96,17 @@ export default function Home() {
     if (foundIndex !== -1) setCurrentIndex(foundIndex);
   };
 
-  const handleExport = () => {
+  const handleExportExcel = () => {
     exportToExcel(data, "labeled_data.xlsx");
+  };
+
+  const handleExportCSV = () => {
+    exportToCSV(data, "labeled_data.csv");
+  };
+
+  const handleDownloadJSON = () => {
+    const grouped = groupedJson ?? buildGroupedJson(data);
+    downloadJson(grouped, "Hung_comment_labeling.json");
   };
 
   const handlePrevious = () => {
@@ -131,7 +150,9 @@ export default function Home() {
             currentIndex={currentIndex}
             onUpdateRow={handleUpdateRow}
             onFindNext={findNextUnlabeled}
-            onExport={handleExport}
+            onExportExcel={handleExportExcel}
+            onExportCSV={handleExportCSV}
+            onDownloadJSON={handleDownloadJSON}
             onPrevious={handlePrevious}
             onNext={handleNext}
           />
