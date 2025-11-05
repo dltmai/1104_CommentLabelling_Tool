@@ -29,14 +29,19 @@ export default function DataDisplay({
     .filter(({ row }) => row.Summary === currentRow.Summary);
 
   const handleLabelUpdateAt = (index, field, value) => {
-    const updatedRow = { ...data[index], [field]: value };
-    console.log("DataDisplay: handleLabelUpdateAt", {
+    // Send only the partial update (changed field) to the parent. The
+    // parent merges partial updates into the existing row. This avoids a
+    // race where two quick child updates (e.g. Contribution then
+    // Contribution_Score) build full rows from stale data and overwrite
+    // each other.
+    const partial = { [field]: value };
+    console.log("DataDisplay: handleLabelUpdateAt (partial)", {
       index,
       field,
       value,
-      updatedRow,
+      partial,
     });
-    onUpdateRow(index, updatedRow);
+    onUpdateRow(index, partial);
   };
 
   const toggleSection = (section) => {
@@ -72,14 +77,14 @@ export default function DataDisplay({
   };
 
   const handleLabelUpdate = (field, value) => {
-    const updatedRow = { ...currentRow, [field]: value };
-    console.log("DataDisplay: handleLabelUpdate", {
+    const partial = { [field]: value };
+    console.log("DataDisplay: handleLabelUpdate (partial)", {
       currentIndex,
       field,
       value,
-      updatedRow,
+      partial,
     });
-    onUpdateRow(currentIndex, updatedRow);
+    onUpdateRow(currentIndex, partial);
   };
 
   // Debug: Log group info (all rows sharing the same Summary)
